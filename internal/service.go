@@ -30,7 +30,7 @@ func NewService(db *gorm.DB) (*Service, error) {
 	return &Service{db: db}, nil
 }
 
-func (s *Service) SetRate(ctx context.Context, req *tax_service.VATRate, res *tax_service.EmptyResponse) error {
+func (s *Service) SetRate(ctx context.Context, req *tax_service.TaxRate, res *tax_service.EmptyResponse) error {
 	tax := Tax{
 		Zip:     req.ZipCode,
 		Country: req.Country,
@@ -56,11 +56,11 @@ func (s *Service) DeleteRate(ctx context.Context, req *tax_service.RateLookupQue
 	return s.db.Delete(tax).Error
 }
 
-func (s *Service) GetSingleRate(ctx context.Context, req *tax_service.RateLookupQuery, res *tax_service.GetSingleRateResponse) error {
+func (s *Service) GetSingleRate(ctx context.Context, req *tax_service.GetRateRequest, res *tax_service.GetRateResponse) error {
 	panic("")
 }
 
-func (s *Service) GetRates(ctx context.Context, req *tax_service.GetRatesQuery, res *tax_service.GetRatesResponse) error {
+func (s *Service) GetRates(ctx context.Context, req *tax_service.GetRatesRequest, res *tax_service.GetRatesResponse) error {
 	var query string
 	var args []interface{}
 
@@ -101,7 +101,7 @@ func (s *Service) GetRates(ctx context.Context, req *tax_service.GetRatesQuery, 
 	}
 
 	for _, r := range rates {
-		res.Rates = append(res.Rates, &tax_service.VATRate{
+		res.Rates = append(res.Rates, &tax_service.TaxRate{
 			ZipCode: r.Zip,
 			Country: r.Country,
 			City:    r.City,

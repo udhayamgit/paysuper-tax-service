@@ -9,10 +9,12 @@ It is generated from these files:
 
 It has these top-level messages:
 	EmptyResponse
-	VATRate
-	GetRatesQuery
+	GetRateRequest
+	GeoIdentity
+	GetRateResponse
+	TaxRate
+	GetRatesRequest
 	RateLookupQuery
-	GetSingleRateResponse
 	GetRatesResponse
 */
 package tax_service
@@ -46,10 +48,10 @@ var _ server.Option
 // Client API for TaxService service
 
 type TaxService interface {
-	SetRate(ctx context.Context, in *VATRate, opts ...client.CallOption) (*EmptyResponse, error)
+	GetRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*GetRateResponse, error)
+	GetRates(ctx context.Context, in *GetRatesRequest, opts ...client.CallOption) (*GetRatesResponse, error)
+	SetRate(ctx context.Context, in *TaxRate, opts ...client.CallOption) (*EmptyResponse, error)
 	DeleteRate(ctx context.Context, in *RateLookupQuery, opts ...client.CallOption) (*EmptyResponse, error)
-	GetSingleRate(ctx context.Context, in *RateLookupQuery, opts ...client.CallOption) (*GetSingleRateResponse, error)
-	GetRates(ctx context.Context, in *GetRatesQuery, opts ...client.CallOption) (*GetRatesResponse, error)
 }
 
 type taxService struct {
@@ -70,7 +72,27 @@ func NewTaxService(name string, c client.Client) TaxService {
 	}
 }
 
-func (c *taxService) SetRate(ctx context.Context, in *VATRate, opts ...client.CallOption) (*EmptyResponse, error) {
+func (c *taxService) GetRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*GetRateResponse, error) {
+	req := c.c.NewRequest(c.name, "TaxService.GetRate", in)
+	out := new(GetRateResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taxService) GetRates(ctx context.Context, in *GetRatesRequest, opts ...client.CallOption) (*GetRatesResponse, error) {
+	req := c.c.NewRequest(c.name, "TaxService.GetRates", in)
+	out := new(GetRatesResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taxService) SetRate(ctx context.Context, in *TaxRate, opts ...client.CallOption) (*EmptyResponse, error) {
 	req := c.c.NewRequest(c.name, "TaxService.SetRate", in)
 	out := new(EmptyResponse)
 	err := c.c.Call(ctx, req, out, opts...)
@@ -90,41 +112,21 @@ func (c *taxService) DeleteRate(ctx context.Context, in *RateLookupQuery, opts .
 	return out, nil
 }
 
-func (c *taxService) GetSingleRate(ctx context.Context, in *RateLookupQuery, opts ...client.CallOption) (*GetSingleRateResponse, error) {
-	req := c.c.NewRequest(c.name, "TaxService.GetSingleRate", in)
-	out := new(GetSingleRateResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *taxService) GetRates(ctx context.Context, in *GetRatesQuery, opts ...client.CallOption) (*GetRatesResponse, error) {
-	req := c.c.NewRequest(c.name, "TaxService.GetRates", in)
-	out := new(GetRatesResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // Server API for TaxService service
 
 type TaxServiceHandler interface {
-	SetRate(context.Context, *VATRate, *EmptyResponse) error
+	GetRate(context.Context, *GetRateRequest, *GetRateResponse) error
+	GetRates(context.Context, *GetRatesRequest, *GetRatesResponse) error
+	SetRate(context.Context, *TaxRate, *EmptyResponse) error
 	DeleteRate(context.Context, *RateLookupQuery, *EmptyResponse) error
-	GetSingleRate(context.Context, *RateLookupQuery, *GetSingleRateResponse) error
-	GetRates(context.Context, *GetRatesQuery, *GetRatesResponse) error
 }
 
 func RegisterTaxServiceHandler(s server.Server, hdlr TaxServiceHandler, opts ...server.HandlerOption) error {
 	type taxService interface {
-		SetRate(ctx context.Context, in *VATRate, out *EmptyResponse) error
+		GetRate(ctx context.Context, in *GetRateRequest, out *GetRateResponse) error
+		GetRates(ctx context.Context, in *GetRatesRequest, out *GetRatesResponse) error
+		SetRate(ctx context.Context, in *TaxRate, out *EmptyResponse) error
 		DeleteRate(ctx context.Context, in *RateLookupQuery, out *EmptyResponse) error
-		GetSingleRate(ctx context.Context, in *RateLookupQuery, out *GetSingleRateResponse) error
-		GetRates(ctx context.Context, in *GetRatesQuery, out *GetRatesResponse) error
 	}
 	type TaxService struct {
 		taxService
@@ -137,18 +139,18 @@ type taxServiceHandler struct {
 	TaxServiceHandler
 }
 
-func (h *taxServiceHandler) SetRate(ctx context.Context, in *VATRate, out *EmptyResponse) error {
+func (h *taxServiceHandler) GetRate(ctx context.Context, in *GetRateRequest, out *GetRateResponse) error {
+	return h.TaxServiceHandler.GetRate(ctx, in, out)
+}
+
+func (h *taxServiceHandler) GetRates(ctx context.Context, in *GetRatesRequest, out *GetRatesResponse) error {
+	return h.TaxServiceHandler.GetRates(ctx, in, out)
+}
+
+func (h *taxServiceHandler) SetRate(ctx context.Context, in *TaxRate, out *EmptyResponse) error {
 	return h.TaxServiceHandler.SetRate(ctx, in, out)
 }
 
 func (h *taxServiceHandler) DeleteRate(ctx context.Context, in *RateLookupQuery, out *EmptyResponse) error {
 	return h.TaxServiceHandler.DeleteRate(ctx, in, out)
-}
-
-func (h *taxServiceHandler) GetSingleRate(ctx context.Context, in *RateLookupQuery, out *GetSingleRateResponse) error {
-	return h.TaxServiceHandler.GetSingleRate(ctx, in, out)
-}
-
-func (h *taxServiceHandler) GetRates(ctx context.Context, in *GetRatesQuery, out *GetRatesResponse) error {
-	return h.TaxServiceHandler.GetRates(ctx, in, out)
 }

@@ -49,9 +49,9 @@ func Test_SetRateForUsFail(t *testing.T) {
 	ctx := context.Background()
 	res := &tax_service.EmptyResponse{}
 
-	assert.Error(t, service.SetRate(ctx, &tax_service.VATRate{Country: "US", Rate: 0.15}, res))
-	assert.Error(t, service.SetRate(ctx, &tax_service.VATRate{Country: "US", City: "Any", Rate: 0.15}, res))
-	assert.Error(t, service.SetRate(ctx, &tax_service.VATRate{Country: "US", City: "Any", State: "AL", Rate: 0.15}, res))
+	assert.Error(t, service.SetRate(ctx, &tax_service.TaxRate{Country: "US", Rate: 0.15}, res))
+	assert.Error(t, service.SetRate(ctx, &tax_service.TaxRate{Country: "US", City: "Any", Rate: 0.15}, res))
+	assert.Error(t, service.SetRate(ctx, &tax_service.TaxRate{Country: "US", City: "Any", State: "AL", Rate: 0.15}, res))
 }
 
 func Test_SetRateForUsSuccess(t *testing.T) {
@@ -59,10 +59,10 @@ func Test_SetRateForUsSuccess(t *testing.T) {
 	defer teardown(t)
 
 	ctx := context.Background()
-	assert.NoError(t, service.SetRate(ctx, &tax_service.VATRate{ZipCode: "12345", Country: "US", City: "Any", State: "AL", Rate: 0.15}, &tax_service.EmptyResponse{}))
+	assert.NoError(t, service.SetRate(ctx, &tax_service.TaxRate{ZipCode: "12345", Country: "US", City: "Any", State: "AL", Rate: 0.15}, &tax_service.EmptyResponse{}))
 
 	res := &tax_service.GetRatesResponse{}
-	assert.NoError(t, service.GetRates(ctx, &tax_service.GetRatesQuery{ZipCode: "12345"}, res))
+	assert.NoError(t, service.GetRates(ctx, &tax_service.GetRatesRequest{ZipCode: "12345"}, res))
 	assert.Equal(t, 1, len(res.Rates))
 
 	assert.Equal(t, "12345", res.Rates[0].ZipCode)
@@ -78,16 +78,16 @@ func TestService_DeleteRate(t *testing.T) {
 
 	ctx := context.Background()
 
-	service.SetRate(ctx, &tax_service.VATRate{Country: "EN", City: "Any", Rate: 0.15}, &tax_service.EmptyResponse{})
+	service.SetRate(ctx, &tax_service.TaxRate{Country: "EN", City: "Any", Rate: 0.15}, &tax_service.EmptyResponse{})
 
 	res := &tax_service.GetRatesResponse{}
-	service.GetRates(ctx, &tax_service.GetRatesQuery{Country: "EN"}, res)
+	service.GetRates(ctx, &tax_service.GetRatesRequest{Country: "EN"}, res)
 
 	assert.NotEmpty(t, res.Rates)
 	assert.NoError(t, service.DeleteRate(ctx, &tax_service.RateLookupQuery{Country: "EN"}, &tax_service.EmptyResponse{}))
 
 	res2 := &tax_service.GetRatesResponse{}
-	service.GetRates(ctx, &tax_service.GetRatesQuery{Country: "EN"}, res2)
+	service.GetRates(ctx, &tax_service.GetRatesRequest{Country: "EN"}, res2)
 	assert.Empty(t, res2.Rates)
 }
 
@@ -97,27 +97,27 @@ func TestService_GetRates(t *testing.T) {
 
 	ctx := context.Background()
 
-	service.SetRate(ctx, &tax_service.VATRate{Country: "EN", City: "Any", Rate: 0.15}, &tax_service.EmptyResponse{})
-	service.SetRate(ctx, &tax_service.VATRate{Country: "EN", City: "Any2", Rate: 0.15}, &tax_service.EmptyResponse{})
-	service.SetRate(ctx, &tax_service.VATRate{Country: "EN", City: "Any3", Rate: 0.15}, &tax_service.EmptyResponse{})
+	service.SetRate(ctx, &tax_service.TaxRate{Country: "EN", City: "Any", Rate: 0.15}, &tax_service.EmptyResponse{})
+	service.SetRate(ctx, &tax_service.TaxRate{Country: "EN", City: "Any2", Rate: 0.15}, &tax_service.EmptyResponse{})
+	service.SetRate(ctx, &tax_service.TaxRate{Country: "EN", City: "Any3", Rate: 0.15}, &tax_service.EmptyResponse{})
 
 	res := &tax_service.GetRatesResponse{}
-	service.GetRates(ctx, &tax_service.GetRatesQuery{Country: "EN"}, res)
+	service.GetRates(ctx, &tax_service.GetRatesRequest{Country: "EN"}, res)
 
 	assert.Len(t, res.Rates, 3)
 
 	res2 := &tax_service.GetRatesResponse{}
-	service.GetRates(ctx, &tax_service.GetRatesQuery{City: "Any2"}, res2)
+	service.GetRates(ctx, &tax_service.GetRatesRequest{City: "Any2"}, res2)
 
 	assert.Len(t, res2.Rates, 1)
 
 	res3 := &tax_service.GetRatesResponse{}
-	service.GetRates(ctx, &tax_service.GetRatesQuery{Country: "EN", City: "Any3"}, res3)
+	service.GetRates(ctx, &tax_service.GetRatesRequest{Country: "EN", City: "Any3"}, res3)
 
 	assert.Len(t, res3.Rates, 1)
 
 	res4 := &tax_service.GetRatesResponse{}
-	service.GetRates(ctx, &tax_service.GetRatesQuery{Country: "US", City: "Any3"}, res4)
+	service.GetRates(ctx, &tax_service.GetRatesRequest{Country: "US", City: "Any3"}, res4)
 
 	assert.Empty(t, res4.Rates)
 }
