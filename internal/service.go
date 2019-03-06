@@ -5,15 +5,19 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/paysuper/paysuper-tax-service/proto"
+	"time"
 )
 
 type Tax struct {
-	gorm.Model
-	Zip     string  `gorm:"type:varchar(5);index"`
-	Country string  `gorm:"type:varchar(2);not null;unique_index:idx_primary"`
-	City    string  `gorm:"type:varchar(100);unique_index:idx_primary"`
-	State   string  `gorm:"type:varchar(2);unique_index:idx_primary"`
-	Rate    float32 `gorm:"type:decimal(10,2);not null"`
+	ID        uint32  `gorm:"primary_key"`
+	Zip       string  `gorm:"type:varchar(5);index"`
+	Country   string  `gorm:"type:varchar(2);not null;unique_index:idx_primary"`
+	City      string  `gorm:"type:varchar(100);unique_index:idx_primary"`
+	State     string  `gorm:"type:varchar(2);unique_index:idx_primary"`
+	Rate      float32 `gorm:"type:decimal(10,2);not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time `sql:"index"`
 }
 
 type Service struct {
@@ -30,9 +34,10 @@ func NewService(db *gorm.DB) (*Service, error) {
 	return &Service{db: db}, nil
 }
 
-func (s *Service) SetRate(ctx context.Context, req *tax_service.TaxRate, res *tax_service.EmptyResponse) error {
+func (s *Service) CreateOrUpdate(ctx context.Context, req *tax_service.TaxRate, res *tax_service.TaxRate) error {
 	tax := Tax{
-		Zip:     req.ZipCode,
+		ID:      req.Id,
+		Zip:     req.Zip,
 		Country: req.Country,
 		City:    req.City,
 		State:   req.State,
@@ -43,66 +48,75 @@ func (s *Service) SetRate(ctx context.Context, req *tax_service.TaxRate, res *ta
 		return fmt.Errorf("invalid tax entry for US %v", tax)
 	}
 
-	return s.db.Where(tax).FirstOrCreate(&tax).Error
+	err := s.db.Where(tax).FirstOrCreate(&tax, &tax).Error
+	if err != nil {
+		return err
+	}
+
+	res.Id = tax.ID
+	res.Zip = tax.Zip
+	res.Country = tax.Country
+	res.City = tax.City
+	res.State = tax.State
+	res.Rate = tax.Rate
+
+	return nil
 }
 
-func (s *Service) DeleteRate(ctx context.Context, req *tax_service.RateLookupQuery, res *tax_service.EmptyResponse) error {
-	tax := Tax{
-		Zip:     req.ZipCode,
-		Country: req.Country,
-		City:    req.City,
-		State:   req.State,
-	}
-	return s.db.Delete(tax).Error
+func (s *Service) DeleteRateById(ctx context.Context, req *tax_service.DeleteRateRequest, res *tax_service.DeleteRateResponse) error {
+	return s.db.Delete(&Tax{ID: req.Id}).Error
 }
 
 func (s *Service) GetRate(ctx context.Context, req *tax_service.GetRateRequest, res *tax_service.GetRateResponse) error {
 	panic("")
 }
 
-func (s *Service) GetRates(ctx context.Context, req *tax_service.GetRatesRequest, res *tax_service.GetRatesResponse) error {
+func (s *Service) createGetQuery(zip, country, city string) (string, []interface{}) {
 	var query string
 	var args []interface{}
 
-	if req.ZipCode != "" {
+	if zip != "" {
 		query = "zip = ?"
-		args = append(args, req.ZipCode)
+		args = append(args, zip)
 	} else {
 		query = "true"
-		if req.Country != "" {
+		if country != "" {
 			query = query + " AND country = ?"
-			args = append(args, req.Country)
+			args = append(args, country)
 		}
 
-		if req.City != "" {
+		if city != "" {
 			query = query + " AND city = ?"
-			args = append(args, req.City)
+			args = append(args, city)
 		}
 	}
 
-	var limit int32
-	if req.Limit > 0 {
-		limit = req.Limit
-	} else {
-		limit = -1
+	return query, args
+
+}
+
+func (s *Service) GetRates(ctx context.Context, req *tax_service.GetRatesRequest, res *tax_service.GetRatesResponse) error {
+	query, args := s.createGetQuery(req.Zip, req.Country, req.City)
+
+	request := s.db.Order("country desc").Where(query, args...)
+	if req.Offset > 0 {
+		request = request.Limit(req.Limit)
 	}
 
-	var offset int32
-	if req.Offset > 0 {
-		offset = req.Offset
-	} else {
-		offset = -1
+	if req.Limit > 0 {
+		request = request.Limit(req.Limit)
 	}
 
 	var rates []Tax
-	err := s.db.Order("country desc").Where(query, args...).Limit(limit).Offset(offset).Find(&rates).Error
+
+	err := request.Find(&rates).Error
 	if err != nil {
 		return err
 	}
 
 	for _, r := range rates {
 		res.Rates = append(res.Rates, &tax_service.TaxRate{
-			ZipCode: r.Zip,
+			Zip:     r.Zip,
 			Country: r.Country,
 			City:    r.City,
 			State:   r.State,

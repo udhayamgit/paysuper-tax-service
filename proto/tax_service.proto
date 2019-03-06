@@ -6,11 +6,11 @@ service TaxService {
     rpc GetRate (GetRateRequest) returns (GetRateResponse) {}
     rpc GetRates (GetRatesRequest) returns (GetRatesResponse) {}
 
-    rpc SetRate (TaxRate) returns (EmptyResponse) {}
-    rpc DeleteRate (RateLookupQuery) returns (EmptyResponse) {}
+    rpc CreateOrUpdate (TaxRate) returns (TaxRate) {}
+    rpc DeleteRateById (DeleteRateRequest) returns (DeleteRateResponse) {}
 }
 
-message EmptyResponse {}
+message DeleteRateResponse {}
 
 message GetRateRequest {
     // @inject_tag: json:"ip"
@@ -22,7 +22,7 @@ message GetRateRequest {
 
 message GeoIdentity {
     // @inject_tag: json:"zip"
-    string zip_code = 1;
+    string zip = 1;
     // @inject_tag: json:"country"
     string country = 2;
     // @inject_tag: json:"city,omitempty"
@@ -38,24 +38,27 @@ message GetRateResponse {
 }
 
 message TaxRate {
+    // @inject_tag: json:"id"
+    uint32 id = 1;
+
     // @inject_tag: json:"zip"
-    string zip_code= 1;
+    string zip = 2;
 
     // @inject_tag: json:"country"
-    string country = 2;
+    string country = 3;
 
     // @inject_tag: json:"city,omitempty"
-    string city = 3;
+    string city = 4;
 
     // @inject_tag: gorm:"type:varchar(2)"
-    string state = 4;
+    string state = 5;
 
     // @inject_tag: json:"rate"
     float rate = 6;
 }
 message GetRatesRequest {
     // @inject_tag: json:"zip"
-    string zip_code= 1;
+    string zip = 1;
     // @inject_tag: json:"country"
     string country = 2;
     // @inject_tag: json:"city,omitempty"
@@ -66,15 +69,8 @@ message GetRatesRequest {
     int32 offset = 5;
 }
 
-message RateLookupQuery {
-    // @inject_tag: json:"zip"
-    string zip_code = 1;
-    // @inject_tag: json:"country"
-    string country = 2;
-    // @inject_tag: json:"city,omitempty"
-    string city = 3;
-    // @inject_tag: json:"state,omitempty"
-    string state = 4;
+message DeleteRateRequest {
+    uint32 id = 1;
 }
 
 message GetRatesResponse {

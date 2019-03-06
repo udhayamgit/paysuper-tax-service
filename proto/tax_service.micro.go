@@ -8,13 +8,13 @@ It is generated from these files:
 	tax_service.proto
 
 It has these top-level messages:
-	EmptyResponse
+	DeleteRateResponse
 	GetRateRequest
 	GeoIdentity
 	GetRateResponse
 	TaxRate
 	GetRatesRequest
-	RateLookupQuery
+	DeleteRateRequest
 	GetRatesResponse
 */
 package tax_service
@@ -50,8 +50,8 @@ var _ server.Option
 type TaxService interface {
 	GetRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*GetRateResponse, error)
 	GetRates(ctx context.Context, in *GetRatesRequest, opts ...client.CallOption) (*GetRatesResponse, error)
-	SetRate(ctx context.Context, in *TaxRate, opts ...client.CallOption) (*EmptyResponse, error)
-	DeleteRate(ctx context.Context, in *RateLookupQuery, opts ...client.CallOption) (*EmptyResponse, error)
+	CreateOrUpdate(ctx context.Context, in *TaxRate, opts ...client.CallOption) (*TaxRate, error)
+	DeleteRateById(ctx context.Context, in *DeleteRateRequest, opts ...client.CallOption) (*DeleteRateResponse, error)
 }
 
 type taxService struct {
@@ -92,9 +92,9 @@ func (c *taxService) GetRates(ctx context.Context, in *GetRatesRequest, opts ...
 	return out, nil
 }
 
-func (c *taxService) SetRate(ctx context.Context, in *TaxRate, opts ...client.CallOption) (*EmptyResponse, error) {
-	req := c.c.NewRequest(c.name, "TaxService.SetRate", in)
-	out := new(EmptyResponse)
+func (c *taxService) CreateOrUpdate(ctx context.Context, in *TaxRate, opts ...client.CallOption) (*TaxRate, error) {
+	req := c.c.NewRequest(c.name, "TaxService.CreateOrUpdate", in)
+	out := new(TaxRate)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -102,9 +102,9 @@ func (c *taxService) SetRate(ctx context.Context, in *TaxRate, opts ...client.Ca
 	return out, nil
 }
 
-func (c *taxService) DeleteRate(ctx context.Context, in *RateLookupQuery, opts ...client.CallOption) (*EmptyResponse, error) {
-	req := c.c.NewRequest(c.name, "TaxService.DeleteRate", in)
-	out := new(EmptyResponse)
+func (c *taxService) DeleteRateById(ctx context.Context, in *DeleteRateRequest, opts ...client.CallOption) (*DeleteRateResponse, error) {
+	req := c.c.NewRequest(c.name, "TaxService.DeleteRateById", in)
+	out := new(DeleteRateResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -117,16 +117,16 @@ func (c *taxService) DeleteRate(ctx context.Context, in *RateLookupQuery, opts .
 type TaxServiceHandler interface {
 	GetRate(context.Context, *GetRateRequest, *GetRateResponse) error
 	GetRates(context.Context, *GetRatesRequest, *GetRatesResponse) error
-	SetRate(context.Context, *TaxRate, *EmptyResponse) error
-	DeleteRate(context.Context, *RateLookupQuery, *EmptyResponse) error
+	CreateOrUpdate(context.Context, *TaxRate, *TaxRate) error
+	DeleteRateById(context.Context, *DeleteRateRequest, *DeleteRateResponse) error
 }
 
 func RegisterTaxServiceHandler(s server.Server, hdlr TaxServiceHandler, opts ...server.HandlerOption) error {
 	type taxService interface {
 		GetRate(ctx context.Context, in *GetRateRequest, out *GetRateResponse) error
 		GetRates(ctx context.Context, in *GetRatesRequest, out *GetRatesResponse) error
-		SetRate(ctx context.Context, in *TaxRate, out *EmptyResponse) error
-		DeleteRate(ctx context.Context, in *RateLookupQuery, out *EmptyResponse) error
+		CreateOrUpdate(ctx context.Context, in *TaxRate, out *TaxRate) error
+		DeleteRateById(ctx context.Context, in *DeleteRateRequest, out *DeleteRateResponse) error
 	}
 	type TaxService struct {
 		taxService
@@ -147,10 +147,10 @@ func (h *taxServiceHandler) GetRates(ctx context.Context, in *GetRatesRequest, o
 	return h.TaxServiceHandler.GetRates(ctx, in, out)
 }
 
-func (h *taxServiceHandler) SetRate(ctx context.Context, in *TaxRate, out *EmptyResponse) error {
-	return h.TaxServiceHandler.SetRate(ctx, in, out)
+func (h *taxServiceHandler) CreateOrUpdate(ctx context.Context, in *TaxRate, out *TaxRate) error {
+	return h.TaxServiceHandler.CreateOrUpdate(ctx, in, out)
 }
 
-func (h *taxServiceHandler) DeleteRate(ctx context.Context, in *RateLookupQuery, out *EmptyResponse) error {
-	return h.TaxServiceHandler.DeleteRate(ctx, in, out)
+func (h *taxServiceHandler) DeleteRateById(ctx context.Context, in *DeleteRateRequest, out *DeleteRateResponse) error {
+	return h.TaxServiceHandler.DeleteRateById(ctx, in, out)
 }
