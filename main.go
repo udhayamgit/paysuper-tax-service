@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/InVisionApp/go-health"
 	"github.com/InVisionApp/go-health/handlers"
-	"github.com/kelseyhightower/envconfig"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
 	k8s "github.com/micro/kubernetes/go/micro"
@@ -17,17 +18,12 @@ import (
 	"time"
 )
 
-type Config struct {
-	KubernetesHost string `envconfig:"KUBERNETES_SERVICE_HOST" required:"false"`
-	MetricsPort    int    `envconfig:"METRICS_PORT" required:"false" default:"8080"`
-}
-
 func main() {
 	logger, _ := zap.NewProduction()
 	zap.ReplaceGlobals(logger)
 
-	config := &Config{}
-	if err := envconfig.Process("", config); err != nil {
+	config, err := internal.LoadConfig()
+	if err != nil {
 		logger.Fatal("Config init failed with error", zap.Error(err))
 	}
 
@@ -48,8 +44,19 @@ func main() {
 
 	service.Init()
 
-	taxService := &internal.Service{}
-	err := tax_service.RegisterTaxServiceHandler(service.Server(), taxService)
+	db, err := gorm.Open("postgres", config.DSN)
+	if err != nil {
+		logger.Fatal("Failed to make Postgres connection", zap.Error(err))
+	}
+
+	defer db.Close()
+
+	taxService, err := internal.NewService(db)
+	if err != nil {
+		logger.Fatal("Can`t create tax service", zap.Error(err))
+	}
+
+	err = tax_service.RegisterTaxServiceHandler(service.Server(), taxService)
 	if err != nil {
 		logger.Fatal("Can`t register service in micro", zap.Error(err))
 	}
