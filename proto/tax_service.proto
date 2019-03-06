@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package tax_service;
+
+service TaxService {
+    rpc SetRate (TaxEntry) returns (EmptyResponse) {}
+    rpc DeleteRate (RateLookupQuery) returns (EmptyResponse) {}
+
+    rpc GetSingleRate (RateLookupQuery) returns (GetSingleRateResponse) {}
+    rpc GetRates (RateLookupQuery) returns (GetRatesResponse) {}
+}
+
+message EmptyResponse {}
+
+message TaxEntry {
+    // @inject_tag: json:"zip"
+    string zip_code= 1;
+    // @inject_tag: json:"country"
+    string country = 2;
+    // @inject_tag: json:"city,omitempty"
+    string city = 3;
+    // @inject_tag: json:"state,omitempty"
+    string state = 4;
+    // @inject_tag: json:"rate"
+    float rate = 6;
+}
+
+message RateLookupQuery {
+    // @inject_tag: json:"zip"
+    string zip_code= 1;
+    // @inject_tag: json:"country"
+    string country = 2;
+    // @inject_tag: json:"city,omitempty"
+    string city = 3;
+    // @inject_tag: json:"state,omitempty"
+    string state = 4;
+}
+
+message GetSingleRateResponse {
+    TaxEntry rate = 1;
+    bool not_accurate = 2;
+}
+
+message GetRatesResponse {
+    // @inject_tag: json:"rates"
+    repeated TaxEntry rates = 1;
+}
