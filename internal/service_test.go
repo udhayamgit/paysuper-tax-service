@@ -49,9 +49,9 @@ func Test_SetRateForUsFail(t *testing.T) {
 	ctx := context.Background()
 	res := &tax_service.EmptyResponse{}
 
-	assert.Error(t, service.SetRate(ctx, &tax_service.TaxEntry{Country: "US", Rate: 0.15}, res))
-	assert.Error(t, service.SetRate(ctx, &tax_service.TaxEntry{Country: "US", City: "Any", Rate: 0.15}, res))
-	assert.Error(t, service.SetRate(ctx, &tax_service.TaxEntry{Country: "US", City: "Any", State: "AL", Rate: 0.15}, res))
+	assert.Error(t, service.SetRate(ctx, &tax_service.VATRate{Country: "US", Rate: 0.15}, res))
+	assert.Error(t, service.SetRate(ctx, &tax_service.VATRate{Country: "US", City: "Any", Rate: 0.15}, res))
+	assert.Error(t, service.SetRate(ctx, &tax_service.VATRate{Country: "US", City: "Any", State: "AL", Rate: 0.15}, res))
 }
 
 func Test_SetRateForUsSuccess(t *testing.T) {
@@ -59,7 +59,7 @@ func Test_SetRateForUsSuccess(t *testing.T) {
 	defer teardown(t)
 
 	ctx := context.Background()
-	assert.NoError(t, service.SetRate(ctx, &tax_service.TaxEntry{ZipCode: "12345", Country: "US", City: "Any", State: "AL", Rate: 0.15}, &tax_service.EmptyResponse{}))
+	assert.NoError(t, service.SetRate(ctx, &tax_service.VATRate{ZipCode: "12345", Country: "US", City: "Any", State: "AL", Rate: 0.15}, &tax_service.EmptyResponse{}))
 
 	res := &tax_service.GetRatesResponse{}
 	assert.NoError(t, service.GetRates(ctx, &tax_service.GetRatesQuery{ZipCode: "12345"}, res))
@@ -78,7 +78,7 @@ func TestService_DeleteRate(t *testing.T) {
 
 	ctx := context.Background()
 
-	service.SetRate(ctx, &tax_service.TaxEntry{Country: "EN", City: "Any", Rate: 0.15}, &tax_service.EmptyResponse{})
+	service.SetRate(ctx, &tax_service.VATRate{Country: "EN", City: "Any", Rate: 0.15}, &tax_service.EmptyResponse{})
 
 	res := &tax_service.GetRatesResponse{}
 	service.GetRates(ctx, &tax_service.GetRatesQuery{Country: "EN"}, res)
@@ -97,9 +97,9 @@ func TestService_GetRates(t *testing.T) {
 
 	ctx := context.Background()
 
-	service.SetRate(ctx, &tax_service.TaxEntry{Country: "EN", City: "Any", Rate: 0.15}, &tax_service.EmptyResponse{})
-	service.SetRate(ctx, &tax_service.TaxEntry{Country: "EN", City: "Any2", Rate: 0.15}, &tax_service.EmptyResponse{})
-	service.SetRate(ctx, &tax_service.TaxEntry{Country: "EN", City: "Any3", Rate: 0.15}, &tax_service.EmptyResponse{})
+	service.SetRate(ctx, &tax_service.VATRate{Country: "EN", City: "Any", Rate: 0.15}, &tax_service.EmptyResponse{})
+	service.SetRate(ctx, &tax_service.VATRate{Country: "EN", City: "Any2", Rate: 0.15}, &tax_service.EmptyResponse{})
+	service.SetRate(ctx, &tax_service.VATRate{Country: "EN", City: "Any3", Rate: 0.15}, &tax_service.EmptyResponse{})
 
 	res := &tax_service.GetRatesResponse{}
 	service.GetRates(ctx, &tax_service.GetRatesQuery{Country: "EN"}, res)

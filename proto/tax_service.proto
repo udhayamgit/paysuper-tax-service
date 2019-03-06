@@ -3,7 +3,7 @@ syntax = "proto3";
 package tax_service;
 
 service TaxService {
-    rpc SetRate (TaxEntry) returns (EmptyResponse) {}
+    rpc SetRate (VATRate) returns (EmptyResponse) {}
     rpc DeleteRate (RateLookupQuery) returns (EmptyResponse) {}
 
     rpc GetSingleRate (RateLookupQuery) returns (GetSingleRateResponse) {}
@@ -12,7 +12,7 @@ service TaxService {
 
 message EmptyResponse {}
 
-message TaxEntry {
+message VATRate {
     // @inject_tag: json:"zip"
     string zip_code= 1;
 
@@ -43,7 +43,7 @@ message GetRatesQuery {
 
 message RateLookupQuery {
     // @inject_tag: json:"zip"
-    string zip_code= 1;
+    string zip_code = 1;
     // @inject_tag: json:"country"
     string country = 2;
     // @inject_tag: json:"city,omitempty"
@@ -53,11 +53,11 @@ message RateLookupQuery {
 }
 
 message GetSingleRateResponse {
-    TaxEntry rate = 1;
+    VATRate rate = 1;
     bool not_accurate = 2;
 }
 
 message GetRatesResponse {
     // @inject_tag: json:"rates"
-    repeated TaxEntry rates = 1;
+    repeated VATRate rates = 1;
 }

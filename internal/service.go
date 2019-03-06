@@ -30,7 +30,7 @@ func NewService(db *gorm.DB) (*Service, error) {
 	return &Service{db: db}, nil
 }
 
-func (s *Service) SetRate(ctx context.Context, req *tax_service.TaxEntry, res *tax_service.EmptyResponse) error {
+func (s *Service) SetRate(ctx context.Context, req *tax_service.VATRate, res *tax_service.EmptyResponse) error {
 	tax := Tax{
 		Zip:     req.ZipCode,
 		Country: req.Country,
@@ -101,7 +101,7 @@ func (s *Service) GetRates(ctx context.Context, req *tax_service.GetRatesQuery, 
 	}
 
 	for _, r := range rates {
-		res.Rates = append(res.Rates, &tax_service.TaxEntry{
+		res.Rates = append(res.Rates, &tax_service.VATRate{
 			ZipCode: r.Zip,
 			Country: r.Country,
 			City:    r.City,
@@ -114,5 +114,10 @@ func (s *Service) GetRates(ctx context.Context, req *tax_service.GetRatesQuery, 
 }
 
 func (s *Service) Status() (interface{}, error) {
+	err := s.db.DB().Ping()
+	if err != nil {
+		return "fail", err
+	}
+
 	return "ok", nil
 }
