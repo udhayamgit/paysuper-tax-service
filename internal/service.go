@@ -56,7 +56,7 @@ func (s *Service) DeleteRate(ctx context.Context, req *tax_service.RateLookupQue
 	return s.db.Delete(tax).Error
 }
 
-func (s *Service) GetSingleRate(ctx context.Context, req *tax_service.GetRateRequest, res *tax_service.GetRateResponse) error {
+func (s *Service) GetRate(ctx context.Context, req *tax_service.GetRateRequest, res *tax_service.GetRateResponse) error {
 	panic("")
 }
 
