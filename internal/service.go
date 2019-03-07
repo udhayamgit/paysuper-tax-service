@@ -53,13 +53,13 @@ func (s *Service) CreateOrUpdate(ctx context.Context, req *tax_service.TaxRate, 
 	}
 
 	if err != nil && err != gorm.ErrRecordNotFound {
-		zap.S().Error("fail to query rate in CreateOrUpdate", "taxRate", req)
+		zap.S().Error("fail to query rate in CreateOrUpdate", "taxRate", req, "error", err)
 		return err
 	}
 
 	err = s.db.Save(tax).Error
 	if err != nil {
-		zap.S().Error("fail to save rate in CreateOrUpdate", "tax", tax)
+		zap.S().Error("fail to save rate in CreateOrUpdate", "tax", tax, "error", err)
 		return err
 	}
 
@@ -68,7 +68,12 @@ func (s *Service) CreateOrUpdate(ctx context.Context, req *tax_service.TaxRate, 
 }
 
 func (s *Service) DeleteRateById(ctx context.Context, req *tax_service.DeleteRateRequest, res *tax_service.DeleteRateResponse) error {
-	return s.db.Delete(&Tax{ID: req.Id}).Error
+	err := s.db.Delete(&Tax{ID: req.Id}).Error
+	if err != nil {
+		zap.S().Error("fail to delete rate", "request", req, "error", err)
+	}
+
+	return err
 }
 
 func (s *Service) GetRate(ctx context.Context, req *tax_service.GetRateRequest, res *tax_service.GetRateResponse) error {
@@ -129,7 +134,7 @@ func (s *Service) getRateByCountry(req *tax_service.GeoIdentity, res *tax_servic
 	}
 
 	if err == gorm.ErrRecordNotFound {
-		zap.S().Error("tax rates for given request unavailable", "get_identity", req)
+		zap.S().Error("tax rates for given request unavailable", "get_identity", req, "error", err)
 		return errors.New("tax rates for given request unavailable")
 	}
 
@@ -141,7 +146,7 @@ func (s *Service) getRateByZip(req *tax_service.GeoIdentity, res *tax_service.Ge
 
 	err := s.db.Where("zip = ?", req.Zip).First(rate).Error
 	if err != nil {
-		zap.S().Warn("tax rates by zip for given request unavailable", "get_identity", req)
+		zap.S().Warn("tax rates by zip for given request unavailable", "get_identity", req, "error", err)
 		return err
 	}
 
@@ -165,7 +170,7 @@ func (s *Service) GetRates(ctx context.Context, req *tax_service.GetRatesRequest
 
 	err := request.Find(&rates).Error
 	if err != nil {
-		zap.S().Warn("get rates search failed", "request", req)
+		zap.S().Warn("get rates search failed", "request", req, "error", err)
 		return err
 	}
 
