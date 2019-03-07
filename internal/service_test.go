@@ -7,6 +7,8 @@ import (
 	"github.com/paysuper/paysuper-tax-service/proto"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"os"
 	"testing"
 )
 
@@ -16,7 +18,15 @@ var (
 )
 
 func init() {
-	logger, _ = zap.NewDevelopment()
+	atom := zap.NewAtomicLevel()
+	atom.SetLevel(zap.FatalLevel)
+
+	logger = zap.New(zapcore.NewCore(
+		zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig()),
+		zapcore.Lock(os.Stdout),
+		atom,
+	))
+
 	zap.ReplaceGlobals(logger)
 }
 
@@ -40,6 +50,19 @@ func setupTest(t *testing.T) (*Service, func(t *testing.T)) {
 		db.DropTableIfExists(&Tax{})
 		db.Close()
 	}
+}
+
+func Test_SetRate(t *testing.T) {
+	service, teardown := setupTest(t)
+	defer teardown(t)
+
+	ctx := context.Background()
+
+	rate := &tax_service.TaxRate{}
+	assert.NoError(t, service.CreateOrUpdate(ctx, &tax_service.TaxRate{Country: "RU", City: "Any", Rate: 0.15}, rate))
+
+	rate.Rate = 0.20
+	assert.NoError(t, service.CreateOrUpdate(ctx, rate, rate))
 }
 
 func Test_SetRateForUsFail(t *testing.T) {
@@ -99,27 +122,211 @@ func TestService_GetRates(t *testing.T) {
 
 	ctx := context.Background()
 
-	service.CreateOrUpdate(ctx, &tax_service.TaxRate{Country: "EN", City: "Any", Rate: 0.15}, &tax_service.TaxRate{})
-	service.CreateOrUpdate(ctx, &tax_service.TaxRate{Country: "EN", City: "Any2", Rate: 0.15}, &tax_service.TaxRate{})
-	service.CreateOrUpdate(ctx, &tax_service.TaxRate{Country: "EN", City: "Any3", Rate: 0.15}, &tax_service.TaxRate{})
+	createTaxRecord(t, ctx, service, "EN", "Any", "", "", 0.15)
+	createTaxRecord(t, ctx, service, "EN", "Any2", "", "", 0.25)
+	createTaxRecord(t, ctx, service, "EN", "Any3", "TS", "", 0.35)
 
 	res := &tax_service.GetRatesResponse{}
 	service.GetRates(ctx, &tax_service.GetRatesRequest{Country: "EN"}, res)
-
 	assert.Len(t, res.Rates, 3)
 
-	res2 := &tax_service.GetRatesResponse{}
-	service.GetRates(ctx, &tax_service.GetRatesRequest{City: "Any2"}, res2)
+	res = &tax_service.GetRatesResponse{}
+	service.GetRates(ctx, &tax_service.GetRatesRequest{City: "Any2"}, res)
+	assert.Len(t, res.Rates, 1)
 
-	assert.Len(t, res2.Rates, 1)
+	res = &tax_service.GetRatesResponse{}
+	service.GetRates(ctx, &tax_service.GetRatesRequest{Country: "EN", City: "Any3"}, res)
+	assert.Len(t, res.Rates, 1)
 
-	res3 := &tax_service.GetRatesResponse{}
-	service.GetRates(ctx, &tax_service.GetRatesRequest{Country: "EN", City: "Any3"}, res3)
+	res = &tax_service.GetRatesResponse{}
+	service.GetRates(ctx, &tax_service.GetRatesRequest{State: "TS"}, res)
+	assert.Len(t, res.Rates, 1)
 
-	assert.Len(t, res3.Rates, 1)
+	res = &tax_service.GetRatesResponse{}
+	service.GetRates(ctx, &tax_service.GetRatesRequest{Country: "EN", Offset: 1, Limit: 1}, res)
+	assert.Len(t, res.Rates, 1)
+	assert.EqualValues(t, 0.25, res.Rates[0].Rate)
 
-	res4 := &tax_service.GetRatesResponse{}
-	service.GetRates(ctx, &tax_service.GetRatesRequest{Country: "US", City: "Any3"}, res4)
+	res = &tax_service.GetRatesResponse{}
+	service.GetRates(ctx, &tax_service.GetRatesRequest{Country: "US", City: "Any3"}, res)
+	assert.Empty(t, res.Rates)
+}
 
-	assert.Empty(t, res4.Rates)
+func TestService_GetRate_Fail(t *testing.T) {
+	service, teardown := setupTest(t)
+	defer teardown(t)
+
+	ctx := context.Background()
+
+	createTaxRecord(t, ctx, service, "US", "New York", "NY", "00001", 0.1)
+	createTaxRecord(t, ctx, service, "GN", "London", "", "", 0.1)
+
+	res := &tax_service.GetRateResponse{
+		Rate: &tax_service.TaxRate{},
+	}
+
+	req := &tax_service.GetRateRequest{
+		UserData: &tax_service.GeoIdentity{},
+		IpData: &tax_service.GeoIdentity{
+			Country: "RU",
+			City:    "Moscow",
+		},
+	}
+
+	assert.Error(t, service.GetRate(ctx, req, res))
+
+	req = &tax_service.GetRateRequest{
+		UserData: &tax_service.GeoIdentity{},
+		IpData: &tax_service.GeoIdentity{
+			Country: "EN",
+		},
+	}
+	assert.Error(t, service.GetRate(ctx, req, res))
+
+	req = &tax_service.GetRateRequest{
+		UserData: &tax_service.GeoIdentity{},
+		IpData: &tax_service.GeoIdentity{
+			Country: "US",
+			City:    "City",
+		},
+	}
+	assert.Error(t, service.GetRate(ctx, req, res))
+
+	req = &tax_service.GetRateRequest{
+		UserData: &tax_service.GeoIdentity{},
+		IpData: &tax_service.GeoIdentity{
+			Country: "US",
+			City:    "City",
+			State:   "",
+		},
+	}
+	assert.Error(t, service.GetRate(ctx, req, res))
+
+	req = &tax_service.GetRateRequest{
+		UserData: &tax_service.GeoIdentity{},
+		IpData: &tax_service.GeoIdentity{
+			Zip: "00000",
+		},
+	}
+	assert.Error(t, service.GetRate(ctx, req, res))
+}
+
+func TestService_GetRate_NonUserData(t *testing.T) {
+	service, teardown := setupTest(t)
+	defer teardown(t)
+
+	ctx := context.Background()
+
+	createTaxRecord(t, ctx, service, "US", "New York", "NY", "00001", 0.1)
+	createTaxRecord(t, ctx, service, "US", "New York", "NY", "00002", 0.2)
+	createTaxRecord(t, ctx, service, "US", "New York", "NY", "00003", 0.3)
+	createTaxRecord(t, ctx, service, "US", "New York", "NY", "00004", 0.4)
+	createTaxRecord(t, ctx, service, "GN", "London", "", "", 0.1)
+
+	req := &tax_service.GetRateRequest{
+		UserData: &tax_service.GeoIdentity{},
+		IpData: &tax_service.GeoIdentity{
+			Country: "GN",
+			City:    "London",
+		},
+	}
+
+	res := &tax_service.GetRateResponse{
+		Rate: &tax_service.TaxRate{},
+	}
+
+	assert.NoError(t, service.GetRate(ctx, req, res))
+	assert.False(t, res.UserDataPriority)
+	assert.EqualValues(t, 0.1, res.Rate.Rate)
+
+	req = &tax_service.GetRateRequest{
+		UserData: &tax_service.GeoIdentity{},
+		IpData: &tax_service.GeoIdentity{
+			Country: "US",
+			City:    "New York",
+			State:   "NY",
+		},
+	}
+
+	assert.NoError(t, service.GetRate(ctx, req, res))
+	assert.False(t, res.UserDataPriority)
+	assert.EqualValues(t, 0.4, res.Rate.Rate)
+
+	req.IpData.Zip = "00001"
+
+	assert.NoError(t, service.GetRate(ctx, req, res))
+	assert.False(t, res.UserDataPriority)
+	assert.EqualValues(t, 0.1, res.Rate.Rate)
+
+	req.IpData.Zip = "00000"
+	assert.NoError(t, service.GetRate(ctx, req, res))
+	assert.False(t, res.UserDataPriority)
+	assert.EqualValues(t, 0.4, res.Rate.Rate)
+}
+
+func TestService_GetRate_WithUserData(t *testing.T) {
+	service, teardown := setupTest(t)
+	defer teardown(t)
+
+	ctx := context.Background()
+
+	createTaxRecord(t, ctx, service, "US", "New York", "NY", "00001", 0.1)
+	createTaxRecord(t, ctx, service, "US", "New York", "NY", "00002", 0.2)
+	createTaxRecord(t, ctx, service, "US", "New York", "NY", "00003", 0.3)
+	createTaxRecord(t, ctx, service, "US", "New York", "NY", "00004", 0.4)
+	createTaxRecord(t, ctx, service, "GN", "London", "", "", 0.1)
+
+	req := &tax_service.GetRateRequest{
+		UserData: &tax_service.GeoIdentity{
+			Country: "US",
+			City:    "New York",
+		},
+		IpData: &tax_service.GeoIdentity{
+			Country: "GN",
+			City:    "London",
+		},
+	}
+
+	res := &tax_service.GetRateResponse{
+		Rate: &tax_service.TaxRate{},
+	}
+
+	assert.NoError(t, service.GetRate(ctx, req, res))
+	assert.False(t, res.UserDataPriority)
+	assert.EqualValues(t, 0.1, res.Rate.Rate)
+
+	req.UserData.State = "NY"
+	assert.NoError(t, service.GetRate(ctx, req, res))
+	assert.True(t, res.UserDataPriority)
+	assert.EqualValues(t, 0.4, res.Rate.Rate)
+}
+
+func TestService_Status(t *testing.T) {
+	service, teardown := setupTest(t)
+	defer teardown(t)
+
+	status, err := service.Status()
+	assert.EqualValues(t, "ok", status)
+	assert.NoError(t, err)
+
+	db.Close()
+
+	status, err = service.Status()
+	assert.EqualValues(t, "fail", status)
+	assert.Error(t, err)
+}
+
+func createTaxRecord(t *testing.T, ctx context.Context, service *Service, country, city, state, zip string, rate float32) {
+	t.Helper()
+
+	stubResp := &tax_service.TaxRate{}
+	tax := &tax_service.TaxRate{
+		Zip:     zip,
+		Country: country,
+		City:    city,
+		State:   state,
+		Rate:    rate,
+	}
+
+	assert.NoError(t, service.CreateOrUpdate(ctx, tax, stubResp))
 }

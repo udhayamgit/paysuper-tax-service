@@ -15,7 +15,6 @@ message DeleteRateResponse {}
 message GetRateRequest {
     // @inject_tag: json:"ip"
     GeoIdentity ip_data = 1;
-
     // @inject_tag: json:"user"
     GeoIdentity user_data = 2;
 }
@@ -32,30 +31,27 @@ message GeoIdentity {
 }
 
 message GetRateResponse {
-    TaxRate vat_rate = 1;
-    bool ip_data_priority = 2;
-    bool user_data_priority = 3;
+    // @inject_tag: json:"rate"
+    TaxRate rate = 1;
+    // @inject_tag: json:"userDataPriority"
+    bool user_data_priority = 2;
 }
 
 message TaxRate {
     // @inject_tag: json:"id"
     uint32 id = 1;
-
     // @inject_tag: json:"zip"
     string zip = 2;
-
     // @inject_tag: json:"country"
     string country = 3;
-
     // @inject_tag: json:"city,omitempty"
     string city = 4;
-
     // @inject_tag: gorm:"type:varchar(2)"
     string state = 5;
-
     // @inject_tag: json:"rate"
     float rate = 6;
 }
+
 message GetRatesRequest {
     // @inject_tag: json:"zip"
     string zip = 1;
@@ -63,10 +59,12 @@ message GetRatesRequest {
     string country = 2;
     // @inject_tag: json:"city,omitempty"
     string city = 3;
+    // @inject_tag: json:"state,omitempty"
+    string state = 4;
     // @inject_tag: json:"limit,omitempty"
-    int32 limit = 4;
+    int32 limit = 5;
     // @inject_tag: json:"offset,omitempty"
-    int32 offset = 5;
+    int32 offset = 6;
 }
 
 message DeleteRateRequest {
