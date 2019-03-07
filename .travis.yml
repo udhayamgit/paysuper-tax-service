@@ -21,6 +21,7 @@ script:
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
+- "curl -H \"Content-Type: application/json;\" -X POST -d \"{\\\"PROJECT\\\": \\\"$TRAVIS_REPO_SLUG\\\", \\\"BRANCH\\\": \\\"$TRAVIS_BRANCH\\\"}\" $JENKINS" 
 
 notifications:
   slack:

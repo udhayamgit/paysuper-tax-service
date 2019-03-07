@@ -11,6 +11,11 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . ./
-RUN CGO_ENABLED=0 GOOS=linux go build -a -o $GOPATH/bin/tax-service .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -o /application/bin/tax-service .
 
-ENTRYPOINT $GOPATH/bin/tax-service
+FROM alpine:3.9
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+WORKDIR /application
+COPY --from=builder /application /application
+
+ENTRYPOINT /application/bin/tax-service
