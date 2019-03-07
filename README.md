@@ -7,7 +7,19 @@
 
 # Motivation
 
+PaySuper works as a tax agent for its customers. This service helps us to determine tax rates for different
+regions. Tax legislation in different regions is quite complex. For example, the EU rules require at least 
+two unambiguous factors in determining the tax rate, Russia requires to pay taxes if the BIN card is issued
+in Russia, in the US taxes vary not only at the state and city levels, but even, in some cases, on 
+different streets in the same city.
 
+How this service works. We use two blocks of information in the request - information received from the 
+user's IP address and provided by the user himself. Priority is always given to information independently 
+specified by the user. If it is not enough or for some reason we cannot get tax rates-IP address data is 
+used.
+
+Additional factors such as the user's language, time zone location, and other criteria must be calculated
+before requests to this service.
 
 # Usage
 
