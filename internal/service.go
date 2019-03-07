@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// Tax defines one tax record in service database.
 type Tax struct {
 	ID        uint32  `gorm:"primary_key"`
 	Zip       string  `gorm:"type:varchar(5);unique_index:idx_primary"`
@@ -22,10 +23,12 @@ type Tax struct {
 	DeletedAt *time.Time `sql:"index"`
 }
 
+// Service is application entry point.
 type Service struct {
 	db *gorm.DB
 }
 
+// NewService create new Service.
 func NewService(db *gorm.DB) (*Service, error) {
 	db.DB().SetMaxIdleConns(10)
 	db.DB().SetMaxOpenConns(100)
@@ -36,6 +39,7 @@ func NewService(db *gorm.DB) (*Service, error) {
 	return &Service{db: db}, nil
 }
 
+// CreateOrUpdate used to create new or updated existing Tax record in database.
 func (s *Service) CreateOrUpdate(ctx context.Context, req *tax_service.TaxRate, res *tax_service.TaxRate) error {
 	if req.Country == "US" && (req.Zip == "" || req.State == "") {
 		zap.S().Error("invalid CreateOrUpdate request for US", "taxRate", req)
@@ -67,6 +71,7 @@ func (s *Service) CreateOrUpdate(ctx context.Context, req *tax_service.TaxRate, 
 	return nil
 }
 
+// DeleteRateById mark Tax record as deleted in database.
 func (s *Service) DeleteRateById(ctx context.Context, req *tax_service.DeleteRateRequest, res *tax_service.DeleteRateResponse) error {
 	err := s.db.Delete(&Tax{ID: req.Id}).Error
 	if err != nil {
@@ -76,6 +81,7 @@ func (s *Service) DeleteRateById(ctx context.Context, req *tax_service.DeleteRat
 	return err
 }
 
+// GetRate returns one single Tax record by given user provided and ip based geo information.
 func (s *Service) GetRate(ctx context.Context, req *tax_service.GetRateRequest, res *tax_service.GetRateResponse) error {
 	res.UserDataPriority = req.UserData.Country != "" && req.UserData.City != ""
 	if !res.UserDataPriority {
@@ -154,6 +160,7 @@ func (s *Service) getRateByZip(req *tax_service.GeoIdentity, res *tax_service.Ge
 	return nil
 }
 
+// GetRates return list of Tax from database based on provided filters.
 func (s *Service) GetRates(ctx context.Context, req *tax_service.GetRatesRequest, res *tax_service.GetRatesResponse) error {
 	query, args := s.createGetRatesQuery(req.Zip, req.Country, req.City, req.State)
 
@@ -209,6 +216,7 @@ func (s *Service) createGetRatesQuery(zip, country, city, state string) (string,
 	return query, args
 }
 
+// Status used to return micro service health.
 func (s *Service) Status() (interface{}, error) {
 	err := s.db.DB().Ping()
 	if err != nil {
