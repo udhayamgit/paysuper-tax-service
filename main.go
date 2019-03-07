@@ -90,7 +90,7 @@ func initHealth(checker health.ICheckable, port int) {
 		zap.L().Fatal("Health check register failed", zap.Error(err))
 	}
 
-	zap.L().Info("Health check listening on :%d", zap.Int("port", port))
+	zap.L().Info("Health check listening port", zap.Int("port", port))
 
 	if err = h.Start(); err != nil {
 		zap.L().Fatal("Health check start failed", zap.Error(err))

@@ -37,7 +37,8 @@ func NewService(db *gorm.DB) (*Service, error) {
 }
 
 func (s *Service) CreateOrUpdate(ctx context.Context, req *tax_service.TaxRate, res *tax_service.TaxRate) error {
-	if req.Country == "US" && (req.Zip == "" || req.City == "" || req.State == "") {
+	if req.Country == "US" && (req.Zip == "" || req.State == "") {
+		zap.S().Error("invalid CreateOrUpdate request for US", "taxRate", req)
 		return fmt.Errorf("invalid tax entry for US %v", req)
 	}
 
@@ -52,11 +53,13 @@ func (s *Service) CreateOrUpdate(ctx context.Context, req *tax_service.TaxRate, 
 	}
 
 	if err != nil && err != gorm.ErrRecordNotFound {
+		zap.S().Error("fail to query rate in CreateOrUpdate", "taxRate", req)
 		return err
 	}
 
 	err = s.db.Save(tax).Error
 	if err != nil {
+		zap.S().Error("fail to save rate in CreateOrUpdate", "tax", tax)
 		return err
 	}
 
@@ -95,7 +98,7 @@ func (s *Service) getRate(req *tax_service.GeoIdentity, res *tax_service.GetRate
 	}
 
 	if err == gorm.ErrRecordNotFound {
-		zap.L().Warn("Fail to get rates for zip", zap.String("zip", req.Zip))
+		zap.S().Warn("fail to get rates for zip", "geo_identity", req)
 		return s.getRateByCountry(req, res)
 	}
 	return err
@@ -103,15 +106,18 @@ func (s *Service) getRate(req *tax_service.GeoIdentity, res *tax_service.GetRate
 
 func (s *Service) getRateByCountry(req *tax_service.GeoIdentity, res *tax_service.GetRateResponse) error {
 	if req.Country == "" {
-		return errors.New("country in getRateByCountry is empty")
+		zap.S().Error("country empty in getRateByCountry", "geo_identity", req)
+		return errors.New("country empty in getRateByCountry")
 	}
 
 	if req.City == "" {
-		return errors.New("city in getRateByCountry is empty")
+		zap.S().Error("city empty in getRateByCountry", "geo_identity", req)
+		return errors.New("city empty in getRateByCountry")
 	}
 
 	if req.Country == "US" && req.State == "" {
-		return errors.New("state in getRateByCountry is empty for USA")
+		zap.S().Error("state empty for US in getRateByCountry", "geo_identity", req)
+		return errors.New("state empty for US in getRateByCountry")
 	}
 
 	rate := &Tax{}
@@ -123,12 +129,7 @@ func (s *Service) getRateByCountry(req *tax_service.GeoIdentity, res *tax_servic
 	}
 
 	if err == gorm.ErrRecordNotFound {
-		zap.L().Warn(
-			"Fail to get rates",
-			zap.String("country", req.Country),
-			zap.String("city", req.City),
-			zap.String("state", req.State),
-		)
+		zap.S().Error("tax rates for given request unavailable", "get_identity", req)
 		return errors.New("tax rates for given request unavailable")
 	}
 
@@ -140,6 +141,7 @@ func (s *Service) getRateByZip(req *tax_service.GeoIdentity, res *tax_service.Ge
 
 	err := s.db.Where("zip = ?", req.Zip).First(rate).Error
 	if err != nil {
+		zap.S().Warn("tax rates by zip for given request unavailable", "get_identity", req)
 		return err
 	}
 
@@ -163,6 +165,7 @@ func (s *Service) GetRates(ctx context.Context, req *tax_service.GetRatesRequest
 
 	err := request.Find(&rates).Error
 	if err != nil {
+		zap.S().Warn("get rates search failed", "request", req)
 		return err
 	}
 
