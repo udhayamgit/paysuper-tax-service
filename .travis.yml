@@ -7,13 +7,17 @@ go:
 - 1.11.x
 
 env:
-- GO111MODULE=on
-- TAX_SERVICE_DSN=postgres://travistest:travistest@localhost:5432/tax_service?sslmode=disable
+  global:
+    - GO111MODULE=on
+    - TAX_SERVICE_DSN=postgres://postgres@localhost:5432/tax_service?sslmode=disable
 
 install: true
 
+before_script:
+  - psql -c 'create database tax_service;' -U postgres
+
 script:
-- go test ./... -coverprofile=coverage.out -covermode=atomic
+- go test ./internal/... -coverprofile=coverage.out -covermode=atomic
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
