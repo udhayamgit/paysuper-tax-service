@@ -1,6 +1,6 @@
 package pkg
 
 var (
-	ServiceName = "PaySuperTaxService"
+	ServiceName = "paysupertaxservice"
 	Version     = "latest"
 )
