@@ -23,7 +23,7 @@ type Tax struct {
 	DeletedAt *time.Time `sql:"index"`
 }
 
-// Service is application entry point.
+// Service is application entry point.s
 type Service struct {
 	db *gorm.DB
 }
@@ -133,9 +133,17 @@ func (s *Service) getRateByCountry(req *tax_service.GeoIdentity, res *tax_servic
 
 	rate := &Tax{}
 
-	err := s.db.Where("country = ? AND city = ? AND state = ?", req.Country, req.City, req.State).Order("rate desc").First(rate).Error
+	err := s.db.Where(
+		"(country = ? AND city = ? AND state = ?) OR (country = ? AND state = ?)",
+		req.Country,
+		req.City,
+		req.State,
+		req.Country,
+		req.State,
+	).Order("rate desc").First(rate).Error
+
 	if err == nil {
-		copyToTaxRate(res.Rate, rate)
+		res.Rate = toTaxRate(rate)
 		return nil
 	}
 
@@ -156,7 +164,7 @@ func (s *Service) getRateByZip(req *tax_service.GeoIdentity, res *tax_service.Ge
 		return err
 	}
 
-	copyToTaxRate(res.Rate, rate)
+	res.Rate = toTaxRate(rate)
 	return nil
 }
 

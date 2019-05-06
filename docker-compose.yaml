@@ -6,7 +6,7 @@ services:
     container_name: tax-postgres
     restart: unless-stopped
     networks: 
-    - subnet
+    - p1devnet
     ports:
       - "5432:5432"
     volumes:
@@ -20,13 +20,16 @@ services:
     depends_on:
       - postgres
     ports:
-      - "8080:8080"
+      - "8081:8081"
     networks: 
-      - subnet
+      - p1devnet
     environment:
       - GO111MODULE=on
       - TAX_SERVICE_DSN=postgres://postgres:postgres@tax-postgres:5432/tax_service?sslmode=disable
+      - METRICS_PORT=8081
+      - MICRO_REGISTRY=consul
+      - MICRO_REGISTRY_ADDRESS=consul
 
 networks:
-  subnet:
+  p1devnet:
     external: true      
