@@ -61,6 +61,11 @@ func (s *Service) CreateOrUpdate(ctx context.Context, req *tax_service.TaxRate, 
 		return err
 	}
 
+	tax.City = req.City
+	tax.Country = req.Country
+	tax.State = req.State
+	tax.Rate = req.Rate
+
 	err = s.db.Save(tax).Error
 	if err != nil {
 		zap.S().Error("fail to save rate in CreateOrUpdate", "tax", tax, "error", err)

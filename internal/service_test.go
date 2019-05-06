@@ -60,9 +60,12 @@ func Test_SetRate(t *testing.T) {
 
 	rate := &tax_service.TaxRate{}
 	assert.NoError(t, service.CreateOrUpdate(ctx, &tax_service.TaxRate{Country: "RU", City: "Any", Rate: 0.15}, rate))
+	assert.EqualValues(t, 0.15, rate.Rate)
 
 	rate.Rate = 0.20
-	assert.NoError(t, service.CreateOrUpdate(ctx, rate, rate))
+	outRate := &tax_service.TaxRate{}
+	assert.NoError(t, service.CreateOrUpdate(ctx, rate, outRate))
+	assert.EqualValues(t, rate.Rate, outRate.Rate)
 }
 
 func Test_SetRateForUsFail(t *testing.T) {
