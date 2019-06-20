@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/paysuper/paysuper-tax-service.svg?branch=master)](https://travis-ci.org/paysuper/paysuper-tax-service) 
 [![codecov](https://codecov.io/gh/paysuper/paysuper-tax-service/branch/master/graph/badge.svg)](https://codecov.io/gh/paysuper/paysuper-tax-service) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/paysuper/paysuper-tax-service)](https://goreportcard.com/report/github.com/paysuper/paysuper-tax-service)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=paysuper_paysuper-tax-service&metric=alert_status)](https://sonarcloud.io/dashboard?id=paysuper_paysuper-tax-service)
 
 # Motivation
 

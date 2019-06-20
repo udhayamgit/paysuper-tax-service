@@ -1,6 +1,11 @@
 language: go
 sudo: false
 
+dist: trusty
+addons:
+  sonarcloud:
+    organization: "paysuper"
+
 stages:
   - test
   - name: deploy 
@@ -21,6 +26,7 @@ jobs:
     - psql -c 'create database tax_service;' -U postgres
     script:
     - go test ./internal/... -coverprofile=coverage.out -covermode=atomic
+    - sonar-scanner
     after_success:
     - bash <(curl -s https://codecov.io/bash)
   - stage: deploy
