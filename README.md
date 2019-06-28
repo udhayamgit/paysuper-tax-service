@@ -31,3 +31,11 @@ Application designed to be launched with Kubernetes and handle all configuration
 | TAX_SERVICE_DSN                     | Postgress DSN string                                                    |
 | TAX_SERVICE_METRICS_PORT            | Http port to expose /health endpoint. Default is `8080`.                |
 | TAX_SERVICE_KUBERNETES_SERVICE_HOST | Should be `true` to laucnh in k8 mode. Default is `false` .             |
+
+
+## Contributing
+We feel that a welcoming community is important and we ask that you follow PaySuper's [Open Source Code of Conduct](https://github.com/paysuper/code-of-conduct/blob/master/README.md) in all interactions with the community.
+
+PaySuper welcomes contributions from anyone and everyone. Please refer to each project's style and contribution guidelines for submitting patches and additions. In general, we follow the "fork-and-pull" Git workflow.
+
+The master branch of this repository contains the latest stable release of this component.
