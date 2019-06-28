@@ -24,9 +24,9 @@ require (
 	github.com/jinzhu/gorm v1.9.2
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
+	github.com/micro/examples v0.1.0 // indirect
 	github.com/micro/go-micro v1.0.0
 	github.com/micro/go-plugins v1.0.0
-	github.com/micro/kubernetes v0.7.0
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
 	github.com/openzipkin/zipkin-go v0.1.5 // indirect
 	github.com/prometheus/client_golang v0.9.2
