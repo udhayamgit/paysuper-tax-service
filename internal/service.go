@@ -17,7 +17,7 @@ type Tax struct {
 	Country   string  `gorm:"type:varchar(2);not null;unique_index:idx_primary"`
 	City      string  `gorm:"type:varchar(100);unique_index:idx_primary"`
 	State     string  `gorm:"type:varchar(2);unique_index:idx_primary"`
-	Rate      float32 `gorm:"type:decimal(10,2);not null"`
+	Rate      float64 `gorm:"type:decimal(20,8);not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time `sql:"index"`
