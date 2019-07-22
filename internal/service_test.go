@@ -319,7 +319,7 @@ func TestService_Status(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func createTaxRecord(t *testing.T, ctx context.Context, service *Service, country, city, state, zip string, rate float32) {
+func createTaxRecord(t *testing.T, ctx context.Context, service *Service, country, city, state, zip string, rate float64) {
 	t.Helper()
 
 	stubResp := &tax_service.TaxRate{}

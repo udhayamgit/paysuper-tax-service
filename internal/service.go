@@ -17,7 +17,7 @@ type Tax struct {
 	Country   string  `gorm:"type:varchar(2);not null;unique_index:idx_primary"`
 	City      string  `gorm:"type:varchar(100);unique_index:idx_primary"`
 	State     string  `gorm:"type:varchar(2);unique_index:idx_primary"`
-	Rate      float32 `gorm:"type:decimal(10,2);not null"`
+	Rate      float64 `gorm:"type:decimal(20,8);not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time `sql:"index"`
@@ -126,27 +126,29 @@ func (s *Service) getRateByCountry(req *tax_service.GeoIdentity, res *tax_servic
 		return errors.New("country empty in getRateByCountry")
 	}
 
-	if req.City == "" {
-		zap.S().Error("city empty in getRateByCountry", "geo_identity", req)
-		return errors.New("city empty in getRateByCountry")
-	}
-
-	if req.Country == "US" && req.State == "" {
+	if req.Country == "US" && (req.State == "" || req.City == "") {
 		zap.S().Error("state empty for US in getRateByCountry", "geo_identity", req)
 		return errors.New("state empty for US in getRateByCountry")
 	}
 
 	rate := &Tax{}
 
-	err := s.db.Where(
-		"(country = ? AND city = ? AND state = ?) OR (country = ? AND state = ?)",
+	options := []interface{}{
 		req.Country,
-		req.City,
-		req.State,
-		req.Country,
-		req.State,
-	).Order("rate desc").First(rate).Error
+	}
+	query := "country = ?"
 
+	if req.City != "" {
+		options = append(options, req.City)
+		query = query + " AND city = ?"
+	}
+
+	if req.State != "" {
+		options = append(options, req.State)
+		query = query + " AND state = ?"
+	}
+
+	err := s.db.Where(query, options...).Order("rate desc").First(rate).Error
 	if err == nil {
 		res.Rate = toTaxRate(rate)
 		return nil

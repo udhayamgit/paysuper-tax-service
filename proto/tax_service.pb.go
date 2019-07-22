@@ -28,7 +28,7 @@ func (m *DeleteRateResponse) Reset()         { *m = DeleteRateResponse{} }
 func (m *DeleteRateResponse) String() string { return proto.CompactTextString(m) }
 func (*DeleteRateResponse) ProtoMessage()    {}
 func (*DeleteRateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_tax_service_7b91d27d3d8283ff, []int{0}
+	return fileDescriptor_tax_service_40e5d79a5fa51590, []int{0}
 }
 func (m *DeleteRateResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteRateResponse.Unmarshal(m, b)
@@ -62,7 +62,7 @@ func (m *GetRateRequest) Reset()         { *m = GetRateRequest{} }
 func (m *GetRateRequest) String() string { return proto.CompactTextString(m) }
 func (*GetRateRequest) ProtoMessage()    {}
 func (*GetRateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_tax_service_7b91d27d3d8283ff, []int{1}
+	return fileDescriptor_tax_service_40e5d79a5fa51590, []int{1}
 }
 func (m *GetRateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetRateRequest.Unmarshal(m, b)
@@ -114,7 +114,7 @@ func (m *GeoIdentity) Reset()         { *m = GeoIdentity{} }
 func (m *GeoIdentity) String() string { return proto.CompactTextString(m) }
 func (*GeoIdentity) ProtoMessage()    {}
 func (*GeoIdentity) Descriptor() ([]byte, []int) {
-	return fileDescriptor_tax_service_7b91d27d3d8283ff, []int{2}
+	return fileDescriptor_tax_service_40e5d79a5fa51590, []int{2}
 }
 func (m *GeoIdentity) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GeoIdentity.Unmarshal(m, b)
@@ -176,7 +176,7 @@ func (m *GetRateResponse) Reset()         { *m = GetRateResponse{} }
 func (m *GetRateResponse) String() string { return proto.CompactTextString(m) }
 func (*GetRateResponse) ProtoMessage()    {}
 func (*GetRateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_tax_service_7b91d27d3d8283ff, []int{3}
+	return fileDescriptor_tax_service_40e5d79a5fa51590, []int{3}
 }
 func (m *GetRateResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetRateResponse.Unmarshal(m, b)
@@ -222,7 +222,7 @@ type TaxRate struct {
 	// @inject_tag: gorm:"type:varchar(2)"
 	State string `protobuf:"bytes,5,opt,name=state,proto3" json:"state,omitempty"`
 	// @inject_tag: json:"rate"
-	Rate                 float32  `protobuf:"fixed32,6,opt,name=rate,proto3" json:"rate,omitempty"`
+	Rate                 float64  `protobuf:"fixed64,6,opt,name=rate,proto3" json:"rate,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -232,7 +232,7 @@ func (m *TaxRate) Reset()         { *m = TaxRate{} }
 func (m *TaxRate) String() string { return proto.CompactTextString(m) }
 func (*TaxRate) ProtoMessage()    {}
 func (*TaxRate) Descriptor() ([]byte, []int) {
-	return fileDescriptor_tax_service_7b91d27d3d8283ff, []int{4}
+	return fileDescriptor_tax_service_40e5d79a5fa51590, []int{4}
 }
 func (m *TaxRate) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TaxRate.Unmarshal(m, b)
@@ -287,7 +287,7 @@ func (m *TaxRate) GetState() string {
 	return ""
 }
 
-func (m *TaxRate) GetRate() float32 {
+func (m *TaxRate) GetRate() float64 {
 	if m != nil {
 		return m.Rate
 	}
@@ -316,7 +316,7 @@ func (m *GetRatesRequest) Reset()         { *m = GetRatesRequest{} }
 func (m *GetRatesRequest) String() string { return proto.CompactTextString(m) }
 func (*GetRatesRequest) ProtoMessage()    {}
 func (*GetRatesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_tax_service_7b91d27d3d8283ff, []int{5}
+	return fileDescriptor_tax_service_40e5d79a5fa51590, []int{5}
 }
 func (m *GetRatesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetRatesRequest.Unmarshal(m, b)
@@ -389,7 +389,7 @@ func (m *DeleteRateRequest) Reset()         { *m = DeleteRateRequest{} }
 func (m *DeleteRateRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteRateRequest) ProtoMessage()    {}
 func (*DeleteRateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_tax_service_7b91d27d3d8283ff, []int{6}
+	return fileDescriptor_tax_service_40e5d79a5fa51590, []int{6}
 }
 func (m *DeleteRateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteRateRequest.Unmarshal(m, b)
@@ -428,7 +428,7 @@ func (m *GetRatesResponse) Reset()         { *m = GetRatesResponse{} }
 func (m *GetRatesResponse) String() string { return proto.CompactTextString(m) }
 func (*GetRatesResponse) ProtoMessage()    {}
 func (*GetRatesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_tax_service_7b91d27d3d8283ff, []int{7}
+	return fileDescriptor_tax_service_40e5d79a5fa51590, []int{7}
 }
 func (m *GetRatesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetRatesResponse.Unmarshal(m, b)
@@ -466,9 +466,9 @@ func init() {
 	proto.RegisterType((*GetRatesResponse)(nil), "tax_service.GetRatesResponse")
 }
 
-func init() { proto.RegisterFile("tax_service.proto", fileDescriptor_tax_service_7b91d27d3d8283ff) }
+func init() { proto.RegisterFile("tax_service.proto", fileDescriptor_tax_service_40e5d79a5fa51590) }
 
-var fileDescriptor_tax_service_7b91d27d3d8283ff = []byte{
+var fileDescriptor_tax_service_40e5d79a5fa51590 = []byte{
 	// 454 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x94, 0xcd, 0x6e, 0xd3, 0x40,
 	0x10, 0xc7, 0x6b, 0x27, 0xce, 0xc7, 0x44, 0x84, 0x74, 0x14, 0x21, 0x2b, 0x7c, 0x45, 0xcb, 0x25,
@@ -488,7 +488,7 @@ var fileDescriptor_tax_service_7b91d27d3d8283ff = []byte{
 	0xd1, 0xb9, 0x71, 0x87, 0x3a, 0x2f, 0x3d, 0x39, 0xaa, 0x38, 0xbe, 0x94, 0x79, 0xf1, 0x2b, 0x82,
 	0x6e, 0xd9, 0x8f, 0x43, 0x88, 0x75, 0xe6, 0x4f, 0x78, 0x24, 0x63, 0x9d, 0x55, 0x70, 0x71, 0x23,
 	0x5c, 0xab, 0x19, 0xae, 0xdd, 0x04, 0x97, 0xd4, 0xe0, 0x9c, 0xd2, 0x93, 0x74, 0xa6, 0xd1, 0x2c,
-	0x0e, 0x9e, 0xc5, 0xef, 0x68, 0x47, 0x6c, 0xab, 0x3b, 0x7d, 0x90, 0xd5, 0xba, 0xec, 0x8d, 0xfe,
+	0x0a, 0x9e, 0xc5, 0xef, 0x68, 0x47, 0x6c, 0xab, 0x3b, 0x7d, 0x90, 0xd5, 0xba, 0xec, 0x8d, 0xfe,
 	0xae, 0xd9, 0x7b, 0x4a, 0x64, 0x08, 0xf0, 0x09, 0x74, 0xf2, 0xeb, 0x6b, 0x4b, 0xec, 0x5d, 0x25,
 	0xb2, 0x8c, 0xc4, 0x2b, 0x38, 0xae, 0xbf, 0xbf, 0x60, 0x6c, 0x6f, 0x4d, 0xe2, 0x0c, 0x46, 0x77,
 	0xde, 0xcb, 0xeb, 0x7a, 0x0d, 0x89, 0x03, 0xb3, 0x69, 0x34, 0x6d, 0x1d, 0xbc, 0xaf, 0x20, 0x39,
@@ -497,6 +497,6 @@ var fileDescriptor_tax_service_7b91d27d3d8283ff = []byte{
 	0xd8, 0xa8, 0xad, 0x36, 0x3d, 0x79, 0x7e, 0xa0, 0xba, 0x1b, 0x75, 0x06, 0xc3, 0x8f, 0x86, 0x14,
 	0xd3, 0x67, 0xf3, 0xb5, 0xc8, 0xfc, 0x1a, 0x9b, 0x80, 0x26, 0x8d, 0x59, 0x71, 0x84, 0x97, 0x30,
 	0xbc, 0x5b, 0xe3, 0x87, 0xed, 0x3c, 0xc3, 0x17, 0xf7, 0x94, 0xff, 0xec, 0x78, 0xf2, 0xf2, 0x60,
-	0xbd, 0x32, 0xf5, 0xad, 0xe3, 0xff, 0x2f, 0xde, 0xfd, 0x0d, 0x00, 0x00, 0xff, 0xff, 0xd8, 0x61,
-	0xcc, 0xbc, 0x44, 0x04, 0x00, 0x00,
+	0xbd, 0x32, 0xf5, 0xad, 0xe3, 0xff, 0x2f, 0xde, 0xfd, 0x0d, 0x00, 0x00, 0xff, 0xff, 0x82, 0x1e,
+	0xfa, 0xc1, 0x44, 0x04, 0x00, 0x00,
 }

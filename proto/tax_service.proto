@@ -49,7 +49,7 @@ message TaxRate {
     // @inject_tag: gorm:"type:varchar(2)"
     string state = 5;
     // @inject_tag: json:"rate"
-    float rate = 6;
+    double rate = 6;
 }
 
 message GetRatesRequest {
