@@ -1,4 +1,4 @@
-FROM golang:1.11.2-alpine AS builder
+FROM golang:1.11-alpine AS builder
 MAINTAINER Nikolay Bondarenko <nikolay.bondarenko@protocol.one>
 
 RUN apk add bash ca-certificates git
