@@ -8,7 +8,6 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
-	k8s "github.com/micro/kubernetes/go/micro"
 	"github.com/paysuper/paysuper-tax-service/internal"
 	"github.com/paysuper/paysuper-tax-service/pkg"
 	"github.com/paysuper/paysuper-tax-service/proto"
@@ -34,14 +33,9 @@ func main() {
 		micro.WrapHandler(prometheus.NewHandlerWrapper()),
 	}
 
-	if config.KubernetesHost == "" {
-		service = micro.NewService(options...)
-		logger.Info("Initialize micro service")
-	} else {
-		service = k8s.NewService(options...)
-		logger.Info("Initialize k8s service")
-	}
+	logger.Info("Initialize k8s service")
 
+	service = micro.NewService(options...)
 	service.Init()
 
 	db, err := gorm.Open("postgres", config.DSN)
