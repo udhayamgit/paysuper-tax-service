@@ -140,7 +140,7 @@ func (s *Service) getRateByCountry(req *tax_service.GeoIdentity, res *tax_servic
 
 	if req.City != "" {
 		options = append(options, req.City)
-		query = query + " AND city = ?"
+		query = query + " AND (city = ? OR city IS NULL)"
 	}
 
 	if req.State != "" {
