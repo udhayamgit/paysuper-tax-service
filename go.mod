@@ -56,3 +56,5 @@ require (
 	honnef.co/go/tools v0.0.0-20190128043916-71123fcbb8fe // indirect
 	sourcegraph.com/sqs/pbtypes v1.0.0 // indirect
 )
+
+replace git.apache.org/thrift.git => github.com/apache/thrift v0.12.0
