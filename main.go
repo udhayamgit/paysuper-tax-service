@@ -14,7 +14,6 @@ import (
 	"github.com/paysuper/paysuper-tax-service/proto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
-	"log"
 	"net/http"
 	"time"
 )
