@@ -7,12 +7,14 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/micro/go-micro"
+	"github.com/micro/go-plugins/client/selector/static"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
 	"github.com/paysuper/paysuper-tax-service/internal"
 	"github.com/paysuper/paysuper-tax-service/pkg"
 	"github.com/paysuper/paysuper-tax-service/proto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
+	"log"
 	"net/http"
 	"time"
 )
@@ -31,6 +33,11 @@ func main() {
 		micro.Name(pkg.ServiceName),
 		micro.Version(pkg.Version),
 		micro.WrapHandler(prometheus.NewHandlerWrapper()),
+	}
+
+	if config.MicroSelector == "static" {
+		zap.L().Info(`Use micro selector "static"`)
+		options = append(options, micro.Selector(static.NewSelector()))
 	}
 
 	logger.Info("Initialize k8s service")
